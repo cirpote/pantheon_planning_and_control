@@ -46,6 +46,8 @@ public:
     }
 
     void showGUI(bool* p_open);
+    void processAvatar();
+    void init3DObjRendering(std::string&& package_path_str);
 
 protected:
 
@@ -114,8 +116,8 @@ protected:
     Eigen::Vector3d curr_pos_, curr_att_, curr_lin_vel_, curr_ang_vel_; 
     Eigen::Quaterniond curr_q_;
 
-    cv::Mat draw_image_, draw_image_res_;
-    GLuint my_opengl_texture;
+    cv::Mat draw_image_, draw_image_res_, avatarImg, avatarImg_res;
+    GLuint my_opengl_texture, my_avatar_texture;
 
 protected:
 
@@ -125,7 +127,5 @@ protected:
 
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Shader> shader;
-    std::shared_ptr<Model> model;
-    cv::Mat avatarImg_res;
-
+    std::shared_ptr<Model> tree_model, sherpa_model;
 };

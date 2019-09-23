@@ -22,6 +22,8 @@ IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_shor
   trajectory_pts_.points.push_back(pt);
   trajectory_pts_.joint_names.push_back("sherpa_base_link");
 
+  this->init3DObjRendering( ros::package::getPath("rvb_mpc") );
+
   int iter = 0;
   while(true){
     if (exists( ros::package::getPath("rvb_mpc") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" ) ){
@@ -109,36 +111,32 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
 
 void IBVSRandomNode::computeClosestTrees(){
 
-  std::map<float, Eigen::Vector3d> treesMap;
-  for(unsigned int iter = 0; iter < trees_array.size(); ++iter)
-    treesMap.insert(std::make_pair<float, Eigen::Vector3d>( (trees_array[iter]-_current_odom_position.head(2)).norm(),
-                                                             Eigen::Vector3d(trees_array[iter](0),trees_array[iter](1),iter) ));
+  // std::map<float, Eigen::Vector3d> treesMap;
+  // for(unsigned int iter = 0; iter < trees_array.size(); ++iter)
+  //   treesMap.insert(std::make_pair<float, Eigen::Vector3d>( (trees_array[iter]-_current_odom_position.head(2)).norm(),
+  //                                                            Eigen::Vector3d(trees_array[iter](0),trees_array[iter](1),iter) ));
   
 
-  std::map<float, Eigen::Vector3d>::iterator it = treesMap.begin();
-  Obst1_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  ++it;    
-  Obst2_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  ++it;    
-  Obst3_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  ++it;    
-  Obst4_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  ++it;    
-  Obst5_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  ++it;    
-  Obst6_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // std::map<float, Eigen::Vector3d>::iterator it = treesMap.begin();
+  // Obst1_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // ++it;    
+  // Obst2_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // ++it;    
+  // Obst3_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // ++it;    
+  // Obst4_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // ++it;    
+  // Obst5_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
+  // ++it;    
+  // Obst6_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
 
-  std::cout << FRED("obstacles: \n");
-  std::cout << std::setprecision(15) << Obst1_.transpose() << "\n";
-  std::cout << std::setprecision(15) << Obst2_.transpose() << "\n";
-  std::cout << std::setprecision(15) << Obst3_.transpose() << "\n";
-  std::cout << std::setprecision(15) << Obst4_.transpose() << "\n";
-  std::cout << std::setprecision(15) << Obst5_.transpose() << "\n";
-  std::cout << std::setprecision(15) << Obst6_.transpose() << "\n";
-
-
-
-
+  // std::cout << FRED("obstacles: \n");
+  // std::cout << std::setprecision(15) << Obst1_.transpose() << "\n";
+  // std::cout << std::setprecision(15) << Obst2_.transpose() << "\n";
+  // std::cout << std::setprecision(15) << Obst3_.transpose() << "\n";
+  // std::cout << std::setprecision(15) << Obst4_.transpose() << "\n";
+  // std::cout << std::setprecision(15) << Obst5_.transpose() << "\n";
+  // std::cout << std::setprecision(15) << Obst6_.transpose() << "\n";
 }
 
 void IBVSRandomNode::getStaticObstacle(){

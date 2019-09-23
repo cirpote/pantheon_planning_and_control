@@ -1,8 +1,8 @@
 #include "mav_imgui.h"
 
-MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), Obst1_(0,0,2) ,
-                                                                   Obst2_(0,0,2), Obst3_(0,0,2) ,
-                                                                   Obst4_(0,0,2) , Obst5_(0,0,2) , Obst6_(0,0,2) {
+MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), Obst1_(4,-2,0) ,
+                                                                   Obst2_(7,-2,0), Obst3_(10,-2,0) ,
+                                                                   Obst4_(4,-6.5,0) , Obst5_(7,-6.5,0) , Obst6_(10,-6.5,0) {
 
   _des_pos_vec3f_t[0] = 0.f;
   _des_pos_vec3f_t[1] = 0.f;
@@ -28,8 +28,127 @@ MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), 
   _vis_pub = _base_nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
   _path_pub = _base_nh.advertise<nav_msgs::Path>( "/path", 1);
 
-  camera = std::make_shared<Camera>( glm::vec3(15.f, 20.f, -65.0f), glm::vec3(0.0f, 1.0f, 0.0f), 100.f );
+  avatarImg = cv::Mat(cv::Size(640,640), CV_8UC3);
+  camera = std::make_shared<Camera>( glm::vec3(0.f, 0.f, 9.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.f, 0.f );
   std::cout << FGRN("Camera Correctly Initialized\n\n");
+}
+
+
+void MavGUI::init3DObjRendering(std::string&& package_path_str){
+
+  char vs_path[200], fs_path[200], model_path_tree[200], model_path_sherpa[200];
+
+  strcpy(vs_path, package_path_str.c_str());
+  strcat(vs_path, "/src/assimp_loader/assets/shaders/modelTextured.vs");
+
+  strcpy(fs_path, package_path_str.c_str());
+  strcat(fs_path, "/src/assimp_loader/assets/shaders/modelTextured.fs");
+
+  strcpy(model_path_tree, package_path_str.c_str());
+  strcat(model_path_tree, "/src/assimp_loader/assets/low_poly_tree/low_poly_tree.obj");
+  strcpy(model_path_sherpa, package_path_str.c_str());
+  strcat(model_path_sherpa, "/src/assimp_loader/assets/sherpa/box.obj");
+
+  //strcat(model_path, "/src/assimp_loader/assets/carmageddon/pjotr_carmageddon.obj");
+
+  shader =  std::make_shared<Shader>( vs_path, fs_path );
+  std::cout << FGRN("Shader Correctly Initialized\n\n");
+
+  tree_model = std::make_shared<Model>(model_path_tree);
+  sherpa_model = std::make_shared<Model>(model_path_sherpa);
+  std::cout << FGRN("Model Correctly Initialized\n\n");
+
+}
+
+void MavGUI::processAvatar(){
+
+    camera = std::make_shared<Camera>( glm::vec3(_current_odom_position(0), _current_odom_position(1), 9.0f),
+                                       glm::vec3(0.0f, 1.0f, 0.0f), -90.f, 0.f );
+
+    ImVec4 clear_color = ImColor(34, 43, 46);
+    //ImVec4 clear_color = ImColor(255, 255, 255);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, 640, 640);
+    // don't forget to enable shader before setting uniforms
+    shader->use();
+
+    // view/projection transformations
+    glm::mat4 projection = glm::perspective((float)476, (float)640 / (float)640, 0.1f, 250.0f);
+
+    glm::mat4 view = camera->GetViewMatrix();
+    shader->setMat4("projection", projection);
+    shader->setMat4("view", view);
+
+    // render the loaded model
+    glm::mat4 currmodel1 = glm::mat4(1.0f);
+    currmodel1 = glm::translate(currmodel1, glm::vec3(4, -2, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel1);
+    tree_model->Draw(*shader);
+
+    glm::mat4 currmodel2 = glm::mat4(1.0f);
+    currmodel2 = glm::translate(currmodel2, glm::vec3(7, -2, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel2);
+    tree_model->Draw(*shader);
+
+    glm::mat4 currmodel3 = glm::mat4(1.0f);
+    currmodel3 = glm::translate(currmodel3, glm::vec3(10, -2, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel3);
+    tree_model->Draw(*shader);
+
+    glm::mat4 currmodel4 = glm::mat4(1.0f);
+    currmodel4 = glm::translate(currmodel4, glm::vec3(4, -6.5, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel4);
+    tree_model->Draw(*shader);
+
+    glm::mat4 currmodel5 = glm::mat4(1.0f);
+    currmodel5 = glm::translate(currmodel5, glm::vec3(7, -6.5, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel5);
+    tree_model->Draw(*shader);
+
+    glm::mat4 currmodel6 = glm::mat4(1.0f);
+    currmodel6 = glm::translate(currmodel6, glm::vec3(10, -6.5, 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel6);
+    tree_model->Draw(*shader);
+
+
+    float angle = 2 * std::acos(_current_orientation.w());
+    float norm_fact = std::sqrt(1 - _current_orientation.w()*_current_orientation.w());
+    glm::vec3 rot_axis(_current_orientation.x() / norm_fact,
+                       _current_orientation.y() / norm_fact,
+                       _current_orientation.z() / norm_fact);
+
+    glm::mat4 currmodel7 = glm::mat4(1.0f);
+    currmodel7 = glm::translate(currmodel7, glm::vec3(_current_odom_position(0), _current_odom_position(1), 0)); // translate it down so it's at the center of the scene
+    currmodel7 = glm::rotate(currmodel7, angle, rot_axis);
+    shader->setMat4("model", currmodel7);
+    sherpa_model->Draw(*shader);
+
+
+    glReadPixels ( 0, 0, 640, 640, GL_BGR,
+                   GL_UNSIGNED_BYTE, ( GLubyte * ) avatarImg.data );
+    cv::flip(avatarImg, avatarImg, 0);
+    cv::cvtColor(avatarImg, avatarImg, CV_RGB2BGR);
+    
+    cv::resize(avatarImg, avatarImg_res, cv::Size(avatarImg.cols/2, avatarImg.rows/2) );
+    cv::transpose(avatarImg_res, avatarImg_res);
+    cv::flip(avatarImg_res, avatarImg_res, 1);
+
+    int N = trajectory_pts_.points[0].positions.size()/3;
+    std::vector<Eigen::Vector2f> pt( N, Eigen::Vector2f(0,0) );
+    for(unsigned int iter = 0; iter < N; ++iter){
+      pt[iter] = Eigen::Vector2f( - trajectory_pts_.points[0].positions[iter * 3 + 1], - trajectory_pts_.points[0].positions[iter * 3] ) - 
+                Eigen::Vector2f( - _current_odom_position(1), - _current_odom_position(0));
+      pt[iter] = 180*pt[iter]/9 + Eigen::Vector2f(320/2,320/2); 
+      cv::circle(avatarImg_res, cv::Point2i(pt[iter](0), pt[iter](1)), 5, cv::Scalar(255,0,0), 3);
+    }
+
+    for(unsigned int iter = 0; iter < N - 1; ++iter)
+      cv::line(avatarImg_res, cv::Point2i(pt[iter](0), pt[iter](1)), cv::Point2i(pt[iter+1](0), pt[iter+1](1)), cv::Scalar(0,0,255),3);
+
+
+
 }
 
 void MavGUI::drawMarkerRViz(const Eigen::Vector3f& p, const std::string& ns){
@@ -143,8 +262,11 @@ void MavGUI::disactivateController(){
   std::cout << FBLU("MavGUI: ") << srvCall.response.result << "\n";
 }
 
+
+
 void MavGUI::showGUI(bool *p_open) {
 
+  processAvatar();
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_MenuBar;
  
@@ -265,10 +387,20 @@ void MavGUI::showGUI(bool *p_open) {
     showGazeboGUI(&_show_gazebo_gui);
   }
    
+  // // Turn the RGB pixel data into an OpenGL texture:
+  // glDeleteTextures(1, &my_opengl_texture);
+  // glGenTextures(1, &my_opengl_texture);
+  // glBindTexture(GL_TEXTURE_2D, my_opengl_texture);
+  // glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  // glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  // glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S , GL_REPEAT );
+  // glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+  // glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
   // Turn the RGB pixel data into an OpenGL texture:
-  glDeleteTextures(1, &my_opengl_texture);
-  glGenTextures(1, &my_opengl_texture);
-  glBindTexture(GL_TEXTURE_2D, my_opengl_texture);
+  glDeleteTextures(1, &my_avatar_texture);
+  glGenTextures(1, &my_avatar_texture);
+  glBindTexture(GL_TEXTURE_2D, my_avatar_texture);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S , GL_REPEAT );
@@ -276,9 +408,14 @@ void MavGUI::showGUI(bool *p_open) {
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
   ImGui::Columns(2, "Current Image and UAV Avatar");
-  ImGui::Text("Augmented Current Image");
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, draw_image_res_.cols, draw_image_res_.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, draw_image_res_.data);
-  ImGui::Image((void*)(intptr_t)my_opengl_texture, ImVec2(draw_image_res_.cols, draw_image_res_.rows));
+  ImGui::Text("UAV Avatar");
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, avatarImg_res.cols, avatarImg_res.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, avatarImg_res.data);
+  ImGui::Image((void*)(intptr_t)my_avatar_texture, ImVec2(avatarImg_res.cols, avatarImg_res.rows));
+
+  // ImGui::Columns(2, "Current Image and UAV Avatar");
+  // ImGui::Text("Augmented Current Image");
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, draw_image_res_.cols, draw_image_res_.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, draw_image_res_.data);
+  // ImGui::Image((void*)(intptr_t)my_opengl_texture, ImVec2(draw_image_res_.cols, draw_image_res_.rows));
 
   ImGui::NextColumn();
   ImGui::Text("Control law gains");
