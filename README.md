@@ -1,6 +1,6 @@
 # A Navigation Architecture for Ackermann Vehicles in Precision Farming Package #
 
-<img src="src/models/Sherpa_platform.jpg" alt="" width="100%;">
+<img src="models/Sherpa_platform.jpg" alt="" width="100%;">
 
 This software has been tested using Ubuntu 18.04 and Ros Melodic.
 
