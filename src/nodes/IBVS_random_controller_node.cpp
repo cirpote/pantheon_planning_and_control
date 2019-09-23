@@ -117,16 +117,6 @@ void IBVSRandomNode::computeClosestTrees(){
 
   std::map<float, Eigen::Vector3d>::iterator it = treesMap.begin();
   Obst1_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-
-  // Obst1 tf broadcaster
-  /*tf::Transform transform;
-  transform.setOrigin( tf::Vector3(trees_array[it->second(2)](0),trees_array[it->second(2)](1), 0) );
-  tf::Quaternion q;
-  q.setRPY(0, 0, 0);
-  transform.setRotation(q);
-  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "Obst1"));*/
-
-
   ++it;    
   Obst2_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
   ++it;    
@@ -153,15 +143,7 @@ void IBVSRandomNode::computeClosestTrees(){
 
 void IBVSRandomNode::getStaticObstacle(){
   
-  rm3_ackermann_controller::GetTree trees;
-  if(_get_trees.call(trees)){
-
-    for(unsigned int iter = 0; iter < 21; ++iter)
-      trees_array[iter] = Eigen::Vector2d( trees.response.trees.data[iter*2], trees.response.trees.data[iter*2 +1]);
-  }
-
-  trees_received = true;
-  std::cout << FGRN("Obstacles Set\n"); 
+  // TO IMPLEMENT
 
 }
 

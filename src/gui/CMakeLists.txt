@@ -11,7 +11,6 @@ target_link_libraries(mav_imgui_library
   yaml-cpp
   ${OpenCV_LIBS}
   ${catkin_LIBRARIES}
-  AprilTags_lib
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARY}
   ${ASSIMP_LIBRARIES}
