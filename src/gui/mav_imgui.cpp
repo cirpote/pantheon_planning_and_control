@@ -36,7 +36,7 @@ MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), 
 
 void MavGUI::init3DObjRendering(std::string&& package_path_str){
 
-  char vs_path[200], fs_path[200], model_path_tree[200], model_path_sherpa[200];
+  char vs_path[200], fs_path[200], model_path_tree[200], model_path_sherpa[200], model_path_dyn_obst[200];
 
   strcpy(vs_path, package_path_str.c_str());
   strcat(vs_path, "/src/assimp_loader/assets/shaders/modelTextured.vs");
@@ -48,14 +48,15 @@ void MavGUI::init3DObjRendering(std::string&& package_path_str){
   strcat(model_path_tree, "/src/assimp_loader/assets/low_poly_tree/low_poly_tree.obj");
   strcpy(model_path_sherpa, package_path_str.c_str());
   strcat(model_path_sherpa, "/src/assimp_loader/assets/sherpa/box.obj");
-
-  //strcat(model_path, "/src/assimp_loader/assets/carmageddon/pjotr_carmageddon.obj");
+  strcpy(model_path_dyn_obst, package_path_str.c_str());
+  strcat(model_path_dyn_obst, "/src/assimp_loader/assets/dyn_obst/box.obj");
 
   shader =  std::make_shared<Shader>( vs_path, fs_path );
   std::cout << FGRN("Shader Correctly Initialized\n\n");
 
   tree_model = std::make_shared<Model>(model_path_tree);
   sherpa_model = std::make_shared<Model>(model_path_sherpa);
+  dyn_obst_model = std::make_shared<Model>(model_path_dyn_obst);
   std::cout << FGRN("Model Correctly Initialized\n\n");
 
 }
@@ -112,6 +113,10 @@ void MavGUI::processAvatar(){
     shader->setMat4("model", currmodel6);
     tree_model->Draw(*shader);
 
+    glm::mat4 currmodel8 = glm::mat4(1.0f);
+    currmodel8 = glm::translate(currmodel8, glm::vec3(_dyn_obst_vec2f[0], _dyn_obst_vec2f[1], 0)); // translate it down so it's at the center of the scene
+    shader->setMat4("model", currmodel8);
+    dyn_obst_model->Draw(*shader);
 
     float angle = 2 * std::acos(_current_orientation.w());
     float norm_fact = std::sqrt(1 - _current_orientation.w()*_current_orientation.w());

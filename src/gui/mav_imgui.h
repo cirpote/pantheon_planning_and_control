@@ -127,5 +127,5 @@ protected:
 
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Shader> shader;
-    std::shared_ptr<Model> tree_model, sherpa_model;
+    std::shared_ptr<Model> tree_model, sherpa_model, dyn_obst_model;
 };
