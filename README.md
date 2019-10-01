@@ -42,8 +42,7 @@ roslaunch sherpa_ros sherpa_ros_ackermann.launch
 This code has been developed by the Roma Tre Research Unit within the context of the H2020 European Project PANTHEON (grant agreement number 774571).
 Contacts:
 
-```bash
-Ciro Potena <ciro.potena@uniroma3.it>
-Renzo Carpio <renzo.carpio@uniroma3.it>
-Andrea Gasparri <gasparri@dia.uniroma3.it>
-```
+Ciro Potena <ciro.potena@uniroma3.it><br>
+Renzo Carpio <renzo.carpio@uniroma3.it><br>
+Andrea Gasparri <gasparri@dia.uniroma3.it><br>
+
