@@ -36,3 +36,12 @@ catkin build
 ```bash
 roslaunch sherpa_ros sherpa_ros_ackermann.launch
 ```
+
+## Credits ##
+
+This code has been developed by the Roma Tre Research Unit within the context of the H2020 European Project PANTHEON (grant agreement number 774571).
+Contacts:
+
+Ciro Potena <ciro.potena@uniroma3.it>
+Renzo Carpio <renzo.carpio@uniroma3.it>
+Andrea Gasparri <gasparri@dia.uniroma3.it>
