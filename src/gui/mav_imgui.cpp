@@ -24,8 +24,6 @@ MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), 
   _img_sub = _base_nh.subscribe("/camera_gui/camera/image_raw", 1, &MavGUI::imageCb, this, ros::TransportHints().tcpNoDelay());
   _set_control_gains = _base_nh.serviceClient<rm3_ackermann_controller::SetKvalues>("/set_k");
   _activate_controller = _base_nh.serviceClient<rm3_ackermann_controller::ActivateController>("/activate_controller");
-  _set_model_state = _base_nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
-  _vis_pub = _base_nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
   _path_pub = _base_nh.advertise<nav_msgs::Path>( "/path", 1);
 
   avatarImg = cv::Mat(cv::Size(640,640), CV_8UC3);
@@ -156,34 +154,6 @@ void MavGUI::processAvatar(){
 
 }
 
-void MavGUI::drawMarkerRViz(const Eigen::Vector3f& p, const std::string& ns){
-
-  visualization_msgs::Marker marker;
-  marker.header.stamp = ros::Time();
-  marker.header.frame_id = "/map";
-  marker.ns = ns;
-  marker.id = 0;
-  marker.type = visualization_msgs::Marker::CUBE;
-  marker.action = visualization_msgs::Marker::ADD;
-  marker.lifetime = ros::Duration();
-  marker.pose.position.x = p(0);
-  marker.pose.position.y = p(1);
-  marker.pose.position.z = p(2);
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.z = 0.0;
-  marker.pose.orientation.w = 1.0;
-  marker.scale.x = 0.15;
-  marker.scale.y = 0.15;
-  marker.scale.z = 4.f;
-  marker.color.a = 1.0; 
-  marker.color.r = 0.0;
-  marker.color.g = 1.0;
-  marker.color.b = 0.0;
-  _vis_pub.publish( marker );
-
-}
-
 void MavGUI::imageCb(const sensor_msgs::ImageConstPtr& img_msg){
 
 
@@ -307,7 +277,6 @@ void MavGUI::showGUI(bool *p_open) {
   ImGui::DragFloat("yaw [radians]", &_des_orientationf_t, 0.01f, -M_PI, M_PI);
   if (ImGui::Button("Update Desired State")) 
     updateDesiredState();
-  
 
 
   ImGui::NextColumn();
@@ -331,7 +300,7 @@ void MavGUI::showGUI(bool *p_open) {
   addDataPlot(_x_values, _x_min, _x_max, _current_odom_position(0));
   addDataPlot(_y_values, _y_min, _y_max, _current_odom_position(1));
   addDataPlot(_z_values, _z_min, _z_max, _current_odom_position(2));
-  addDataPlot(_yaw_values, _yaw_min, _yaw_max, _current_yaw_orientation);
+  addDataPlot(_yaw_values, _yaw_min, _yaw_max, _current_yaw_orientation_deg);
   ImGui::Separator();
   ImGui::Text("x[m]"); ImGui::NextColumn();
   ImGui::Text("y[m]"); ImGui::NextColumn();
@@ -341,7 +310,7 @@ void MavGUI::showGUI(bool *p_open) {
   ImGui::Text("%f", _current_odom_position(0)); ImGui::NextColumn();
   ImGui::Text("%f", _current_odom_position(1)); ImGui::NextColumn();
   ImGui::Text("%f", _current_odom_position(2)); ImGui::NextColumn();
-  ImGui::Text("%f", _current_yaw_orientation);  ImGui::NextColumn();
+  ImGui::Text("%f", _current_yaw_orientation_deg);  ImGui::NextColumn();
 
   ImGui::PlotLinesWithTarget("",_x_values, IM_ARRAYSIZE(_x_values), _des_pos_vec3f_w[0],
                              0,"x", FLT_MAX, FLT_MAX, ImVec2(0,40)); ImGui::NextColumn();
@@ -451,15 +420,6 @@ void MavGUI::showGUI(bool *p_open) {
   ImGui::Text("Read Static Obstacles");
   if (ImGui::Button("get Static Obstacle"))
     getStaticObstacle();  
-
-  
-
-  drawMarkerRViz(Obst1_,"hazelnut_tree_1"); 
-  drawMarkerRViz(Obst2_,"hazelnut_tree_2");
-  drawMarkerRViz(Obst3_,"hazelnut_tree_3");
-  drawMarkerRViz(Obst4_,"hazelnut_tree_4");
-  drawMarkerRViz(Obst5_,"hazelnut_tree_5");
-  drawMarkerRViz(Obst6_,"hazelnut_tree_6");
 
 }
 

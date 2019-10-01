@@ -52,14 +52,14 @@ public:
 protected:
 
     // ROS service call
-    ros::ServiceClient _set_control_gains, _activate_controller, _set_model_state;
+    ros::ServiceClient _set_control_gains, _activate_controller;
     ros::Time _gui_ros_time;
 
     // ROS subscriber
     ros::Subscriber _img_sub;
     
     // ROS publisher
-    ros::Publisher _cmd_pub, _waypoint_pub, _vis_pub, _path_pub;
+    ros::Publisher _cmd_pub, _waypoint_pub, _path_pub;
 
     void updateDesiredState();
     void sendWaypoint();
@@ -71,7 +71,6 @@ protected:
     virtual void getStaticObstacle() = 0;
     virtual void resetSolver() = 0;
     void changeControlLawGains();
-    void drawMarkerRViz(const Eigen::Vector3f&, const std::string&);
 
     // Obstcles Position for RViz drawings
     Eigen::Vector3f Obst1_, Obst2_, Obst3_, Obst4_, Obst5_, Obst6_;
@@ -122,7 +121,7 @@ protected:
 protected:
 
     Eigen::Vector3d _current_odom_position;
-    float _current_yaw_orientation, _v, _phi, _lyapunov_cost;
+    float _current_yaw_orientation, _current_yaw_orientation_deg, _v, _phi, _lyapunov_cost;
     Eigen::Quaterniond _current_orientation;
 
     std::shared_ptr<Camera> camera;

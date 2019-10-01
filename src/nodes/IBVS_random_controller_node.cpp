@@ -85,6 +85,7 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
   SHERPA_planner_.setOdometry(odom_msg);
   _current_orientation = utils::quaternionFromMsg(odom_msg->pose.pose.orientation); 
   _current_yaw_orientation = utils::yawFromQuaternion(_current_orientation);
+  _current_yaw_orientation_deg = _current_yaw_orientation * 180.0 / M_PI;
   _current_odom_position = utils::vector3FromPointMsg(odom_msg->pose.pose.position);  
 
   tf::Transform transform;
@@ -111,51 +112,19 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
 
 void IBVSRandomNode::computeClosestTrees(){
 
-  // std::map<float, Eigen::Vector3d> treesMap;
-  // for(unsigned int iter = 0; iter < trees_array.size(); ++iter)
-  //   treesMap.insert(std::make_pair<float, Eigen::Vector3d>( (trees_array[iter]-_current_odom_position.head(2)).norm(),
-  //                                                            Eigen::Vector3d(trees_array[iter](0),trees_array[iter](1),iter) ));
-  
-
-  // std::map<float, Eigen::Vector3d>::iterator it = treesMap.begin();
-  // Obst1_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  // ++it;    
-  // Obst2_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  // ++it;    
-  // Obst3_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  // ++it;    
-  // Obst4_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  // ++it;    
-  // Obst5_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-  // ++it;    
-  // Obst6_ = Eigen::Vector3f(trees_array[it->second(2)](0), trees_array[it->second(2)](1),2);
-
-  // std::cout << FRED("obstacles: \n");
-  // std::cout << std::setprecision(15) << Obst1_.transpose() << "\n";
-  // std::cout << std::setprecision(15) << Obst2_.transpose() << "\n";
-  // std::cout << std::setprecision(15) << Obst3_.transpose() << "\n";
-  // std::cout << std::setprecision(15) << Obst4_.transpose() << "\n";
-  // std::cout << std::setprecision(15) << Obst5_.transpose() << "\n";
-  // std::cout << std::setprecision(15) << Obst6_.transpose() << "\n";
+  // TO IMPLEMENT
 }
 
 void IBVSRandomNode::getStaticObstacle(){
   
   // TO IMPLEMENT
-
 }
 
 void IBVSRandomNode::setDynamicObstacle(){
 
-  gazebo_msgs::SetModelState setmodelstate;
-  Eigen::Vector3d dyn_obst_position = Eigen::Vector3d(_dyn_obst_vec2f[0] + 10, _dyn_obst_vec2f[1] + 10, 0);
-  setmodelstate.request.model_state.model_name = "vertical_obst_7";
-  setmodelstate.request.model_state.pose.position = utils::fromEigenVectorToPoint(dyn_obst_position);
-  setmodelstate.request.model_state.pose.orientation = utils::fromEigenQuaternionrToQuaternion(Eigen::Quaterniond(1,0,0,0));
-  _set_model_state.call(setmodelstate);
   SHERPA_planner_.obst7_ = Eigen::Vector2d(_dyn_obst_vec2f[0], _dyn_obst_vec2f[1]);
   SHERPA_planner_.InitializeController();
-  std::cout << FGRN("vertical_obst_7 succesfully set to: ") << dyn_obst_position.transpose() << "\n";
+  std::cout << FGRN("vertical_obst_7 succesfully set to: ") << SHERPA_planner_.obst7_.transpose() << "\n";
 }
 
 static void error_callback(int error, const char* description) {
