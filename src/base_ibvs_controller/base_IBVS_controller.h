@@ -64,7 +64,8 @@ class BaseibvsController
       float attraction_ball_, anti_windup_ball_;
       float delta_time_, prev_time_;
       bool is_first_odometry_set_ = true;
-      tf::TransformListener tfListner_;
+
+      std::string traj_cmd_topic, odometry_topic, command_topic, traj_topic, lyapunov_topic;
 
  private:
 

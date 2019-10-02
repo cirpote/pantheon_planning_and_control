@@ -26,13 +26,10 @@
 #include "../gui/mav_imgui.h"
 #include <std_msgs/Int32MultiArray.h>
 
-bool randomWaypointGeneration = false;
-bool randomSpawnDynObj = false;
-
 class IBVSRandomNode: public MavGUI
 {
  public:
-      IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_short_file, const std::string& gui_file);
+      IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_short_file);
       ~IBVSRandomNode();
 
 
@@ -42,45 +39,41 @@ class IBVSRandomNode: public MavGUI
       // Boolean controls
       bool first_trajectory_cmd_;
      //  randomSpawner dynObjSpawner;
+     ofstream logFileStream;
+     char packagePath[200];
+     std::string fileName;
 
-      ofstream logFileStream;
-      char packagePath[200];
-      std::string fileName;
+     //Controllers
+     SherpaAckermannPlanner SHERPA_planner_;
 
-      //Controllers
-      SherpaAckermannPlanner SHERPA_planner_;
-
-      // ros node handles
-      ros::NodeHandle nh_;
+     // ros node handles
+     ros::NodeHandle nh_;
  
-      // ros publisher and subscribers
-      ros::Publisher trajectory_pts_pub_;
-      ros::Subscriber odom_sub_;
-      ros::Subscriber cmd_pose_sub_;
-      ros::Subscriber ackrmann_cms_sub_;
-      ros::Subscriber lyapunov_sub_;
+     // ros publisher and subscribers
+     ros::Publisher trajectory_pts_pub_;
+     ros::Subscriber odom_sub_;
+     ros::Subscriber cmd_pose_sub_;
+     ros::Subscriber ackrmann_cmd_sub_;
+     ros::Subscriber lyapunov_sub_;
       
-      //Solver Functions
-      void initializeAcadoSolver();
+     //Solver Functions
+     void initializeAcadoSolver();
       
-      //Callbacks
-      void OdometryCallback(const nav_msgs::OdometryConstPtr&);
-      void CommandPoseCallback(const nav_msgs::OdometryConstPtr&);
-      void AkrmCommandsCallback(const geometry_msgs::TwistConstPtr&);
-      void ImageCallback(const sensor_msgs::ImageConstPtr&);
-      void LyapunovCallback(const std_msgs::Float32ConstPtr&);
-      void resetSolver();
-      void setDynamicObstacle();
-      void getStaticObstacle(); 
-      void writeLogData();
+     //Callbacks
+     void OdometryCallback(const nav_msgs::OdometryConstPtr&);
+     void CommandPoseCallback(const nav_msgs::OdometryConstPtr&);
+     void AkrmCommandsCallback(const geometry_msgs::TwistConstPtr&);
+     void ImageCallback(const sensor_msgs::ImageConstPtr&);
+     void LyapunovCallback(const std_msgs::Float32ConstPtr&);
+     void resetSolver();
+     void setDynamicObstacle();
+     void getStaticObstacle(); 
+     void writeLogData();
 
-      //commands
-      Eigen::Matrix<double,3,1>& ang_vel_ref;
+     //commands
+     Eigen::Matrix<double,3,1>& ang_vel_ref;
 
      std::vector<Eigen::Vector2d> trees_array;
      bool trees_received = false;
-     tf::TransformBroadcaster br;
-
      void computeClosestTrees();
-
 };

@@ -2,17 +2,17 @@
 
 using namespace std;
 
-IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_short_file, const std::string& gui_file)
-  : MavGUI(nh, gui_file), nh_(nh), first_trajectory_cmd_(false), SHERPA_planner_(yaml_short_file), 
+IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_short_file)
+  : MavGUI(nh), nh_(nh), first_trajectory_cmd_(false), SHERPA_planner_(yaml_short_file), 
     ang_vel_ref(SHERPA_planner_.odometry.angular_velocity_B), trees_array(21, Eigen::Vector2d(0,0))
 
 {
 
-  odom_sub_ = nh_.subscribe( "/odom", 1, &IBVSRandomNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay() );
-  cmd_pose_sub_ = nh_.subscribe("/command/pose", 1, &IBVSRandomNode::CommandPoseCallback, this, ros::TransportHints().tcpNoDelay() );
-  ackrmann_cms_sub_ = nh_.subscribe("/base/base_pad/cmd_vel", 1, &IBVSRandomNode::AkrmCommandsCallback, this, ros::TransportHints().tcpNoDelay() );
-  trajectory_pts_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>("/sherpa/trajectory_pts", 1);
-  lyapunov_sub_ = nh.subscribe("/lyapunov", 1, &IBVSRandomNode::LyapunovCallback, this, ros::TransportHints().tcpNoDelay() );
+  odom_sub_ = nh_.subscribe( SHERPA_planner_.odometry_topic, 1, &IBVSRandomNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay() );
+  cmd_pose_sub_ = nh_.subscribe( SHERPA_planner_.traj_cmd_topic, 1, &IBVSRandomNode::CommandPoseCallback, this, ros::TransportHints().tcpNoDelay() );
+  ackrmann_cmd_sub_ = nh_.subscribe( SHERPA_planner_.command_topic, 1, &IBVSRandomNode::AkrmCommandsCallback, this, ros::TransportHints().tcpNoDelay() );
+  trajectory_pts_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>( SHERPA_planner_.traj_topic, 1);
+  lyapunov_sub_ = nh.subscribe( SHERPA_planner_.lyapunov_topic, 1, &IBVSRandomNode::LyapunovCallback, this, ros::TransportHints().tcpNoDelay() );
 
   std::cerr << "\n" << FBLU("Initializing short term Controller from:") << " " << yaml_short_file << "\n";
   SHERPA_planner_.InitializeController();
@@ -88,13 +88,6 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
   _current_yaw_orientation_deg = _current_yaw_orientation * 180.0 / M_PI;
   _current_odom_position = utils::vector3FromPointMsg(odom_msg->pose.pose.position);  
 
-  tf::Transform transform;
-  transform.setOrigin( tf::Vector3(_current_odom_position(0), _current_odom_position(1), 0) );
-  tf::Quaternion q;
-  q.setRPY(0, 0, _current_yaw_orientation);
-  transform.setRotation(q);
-  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "map_gps"));
-
   if( trees_received )
     computeClosestTrees();
 
@@ -134,12 +127,11 @@ static void error_callback(int error, const char* description) {
 int main(int argc, char** argv) {
 
   if(argc < 3) {
-        std::cerr << FRED("Other Params Expected!") << " node_name <params_short_term_file> <gui_params>" << "\n";
+        std::cerr << FRED("Other Params Expected!") << " node_name <params_short_term_file>" << "\n";
         std::exit(1);
   }
 
   std::string yaml_short_filename = argv[1];
-  std::string gui_filename = argv[2];
 
   // Setup window
   glfwSetErrorCallback(error_callback);
@@ -175,7 +167,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "mav_gnomic_gui_node");
   ros::NodeHandle nh("~");
 
-  IBVSRandomNode IBVS_node(nh, yaml_short_filename, gui_filename);
+  IBVSRandomNode IBVS_node(nh, yaml_short_filename);
   bool show_gnomic_GUI = true;
 
   // Main loop

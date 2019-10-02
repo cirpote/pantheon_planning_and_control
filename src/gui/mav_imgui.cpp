@@ -1,6 +1,6 @@
 #include "mav_imgui.h"
 
-MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), Obst1_(4,-2,0) ,
+MavGUI::MavGUI(ros::NodeHandle nh) : BaseGUI(nh), Obst1_(4,-2,0) ,
                                                                    Obst2_(7,-2,0), Obst3_(10,-2,0) ,
                                                                    Obst4_(4,-6.5,0) , Obst5_(7,-6.5,0) , Obst6_(10,-6.5,0) {
 
@@ -21,10 +21,8 @@ MavGUI::MavGUI(ros::NodeHandle nh, const std::string& yaml_file) : BaseGUI(nh), 
 
   _gui_ros_time = ros::Time::now();
 
-  _img_sub = _base_nh.subscribe("/camera_gui/camera/image_raw", 1, &MavGUI::imageCb, this, ros::TransportHints().tcpNoDelay());
   _set_control_gains = _base_nh.serviceClient<rm3_ackermann_controller::SetKvalues>("/set_k");
   _activate_controller = _base_nh.serviceClient<rm3_ackermann_controller::ActivateController>("/activate_controller");
-  _path_pub = _base_nh.advertise<nav_msgs::Path>( "/path", 1);
 
   avatarImg = cv::Mat(cv::Size(640,640), CV_8UC3);
   camera = std::make_shared<Camera>( glm::vec3(0.f, 0.f, 9.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.f, 0.f );
@@ -149,43 +147,6 @@ void MavGUI::processAvatar(){
 
     for(unsigned int iter = 0; iter < N - 1; ++iter)
       cv::line(avatarImg_res, cv::Point2i(pt[iter](0), pt[iter](1)), cv::Point2i(pt[iter+1](0), pt[iter+1](1)), cv::Scalar(0,0,255),3);
-
-
-
-}
-
-void MavGUI::imageCb(const sensor_msgs::ImageConstPtr& img_msg){
-
-
-  cv_bridge::CvImagePtr cv_ptr;
-  cv_ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::BGR8);
-
-  draw_image_ = cv_ptr->image.clone();
-
-  float k = 476.70308;
-  float c = 400.5;
-  int size = 800;
-
-  int N = trajectory_pts_.points[0].positions.size()/3;
-  std::vector<Eigen::Vector2f> pt( N, Eigen::Vector2f(0,0) );
-
-  for(unsigned int iter = 0; iter < N; ++iter){
-    pt[iter] = Eigen::Vector2f( - trajectory_pts_.points[0].positions[iter * 3 + 1], - trajectory_pts_.points[0].positions[iter * 3] ) - 
-               Eigen::Vector2f( - _current_odom_position(1), - _current_odom_position(0));
-
-    pt[iter] = k*pt[iter]/15 + Eigen::Vector2f(c,c); 
-
-    cv::circle(draw_image_, cv::Point2i(pt[iter](0), pt[iter](1)), 5, cv::Scalar(255,0,0), 3);
-  }
-
-  for(unsigned int iter = 0; iter < N - 1; ++iter)
-    cv::line(draw_image_, cv::Point2i(pt[iter](0), pt[iter](1)), cv::Point2i(pt[iter+1](0), pt[iter+1](1)), cv::Scalar(0,0,255),3);
-
-  //cv::imshow("ciao", draw_image_);
-  //cv::waitKey(10);
-
-  cv::resize(draw_image_, draw_image_res_, cv::Size( draw_image_.cols/2, draw_image_.rows/2) );
-  cv::cvtColor(draw_image_res_, draw_image_res_, cv::COLOR_BGR2RGB);
 
 }
 

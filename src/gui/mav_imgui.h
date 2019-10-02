@@ -38,7 +38,7 @@
 
 class MavGUI: public BaseGUI{
 public:
-    MavGUI(ros::NodeHandle nh, const std::string& yaml_file);
+    MavGUI(ros::NodeHandle nh);
     
     ~MavGUI() {
 	std::cerr << "[MavGUI]: deleting\n";
@@ -54,16 +54,12 @@ protected:
     // ROS service call
     ros::ServiceClient _set_control_gains, _activate_controller;
     ros::Time _gui_ros_time;
-
-    // ROS subscriber
-    ros::Subscriber _img_sub;
     
     // ROS publisher
-    ros::Publisher _cmd_pub, _waypoint_pub, _path_pub;
+    ros::Publisher _cmd_pub, _waypoint_pub;
 
     void updateDesiredState();
     void sendWaypoint();
-    void imageCb(const sensor_msgs::ImageConstPtr&);
     void activatePublisher(const std::string&, const std::string&);
     void activateController();
     void disactivateController();

@@ -50,6 +50,12 @@ void BaseibvsController::initializeControllerfromYAML(const std::string& yaml_fi
   obst5_ << obst5.at(0), obst5.at(1);
   obst6_ << obst6.at(0), obst6.at(1);
 
+  traj_cmd_topic = configuration["ros_parameters"]["traj_cmd_topic"].as<string>();    
+  odometry_topic = configuration["ros_parameters"]["odometry_topic"].as<string>(); 
+  command_topic = configuration["ros_parameters"]["command_topic"].as<string>(); 
+  traj_topic = configuration["ros_parameters"]["traj_topic"].as<string>(); 
+  lyapunov_topic = configuration["ros_parameters"]["lyapunov_topic"].as<string>(); 
+
 }
 
 void BaseibvsController::ComputeIntegralAction(){
