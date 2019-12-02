@@ -21,7 +21,7 @@ boundary_constraints:
 ros_parameters:
 
   traj_cmd_topic:         /command/pose      
-  odometry_topic:         /odom
+  odometry_topic:         /odom_gps
   command_topic:          /base/base_pad/cmd_vel
   traj_topic:             /sherpa/trajectory_pts
   lyapunov_topic:         /lyapunov
