@@ -12,7 +12,8 @@ IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_shor
   cmd_pose_sub_ = nh_.subscribe( SHERPA_planner_.traj_cmd_topic, 1, &IBVSRandomNode::CommandPoseCallback, this, ros::TransportHints().tcpNoDelay() );
   ackrmann_cmd_sub_ = nh_.subscribe( SHERPA_planner_.command_topic, 1, &IBVSRandomNode::AkrmCommandsCallback, this, ros::TransportHints().tcpNoDelay() );
   trajectory_pts_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>( SHERPA_planner_.traj_topic, 1);
-  lyapunov_sub_ = nh.subscribe( SHERPA_planner_.lyapunov_topic, 1, &IBVSRandomNode::LyapunovCallback, this, ros::TransportHints().tcpNoDelay() );
+  lyapunov_sub_ = nh_.subscribe( SHERPA_planner_.lyapunov_topic, 1, &IBVSRandomNode::LyapunovCallback, this, ros::TransportHints().tcpNoDelay() );
+  nav_obsts_sub_ = nh_.subscribe( "/ekf_slam_node_with_neighbourhood/navigation_obstacles", 1, &IBVSRandomNode::navigationObstaclesCallback, this, ros::TransportHints().tcpNoDelay() );
 
   std::cerr << "\n" << FBLU("Initializing short term Controller from:") << " " << yaml_short_file << "\n";
   SHERPA_planner_.InitializeController();
@@ -22,14 +23,14 @@ IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_shor
   trajectory_pts_.points.push_back(pt);
   trajectory_pts_.joint_names.push_back("sherpa_base_link");
 
-  this->init3DObjRendering( ros::package::getPath("rvb_mpc") );
+  this->init3DObjRendering( ros::package::getPath("pantheon_planning_and_control") );
 
   int iter = 0;
   while(true){
-    if (exists( ros::package::getPath("rvb_mpc") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" ) ){
+    if (exists( ros::package::getPath("pantheon_planning_and_control") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" ) ){
         iter++;
     } else {
-      logFileStream.open( ros::package::getPath("rvb_mpc") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" );
+      logFileStream.open( ros::package::getPath("pantheon_planning_and_control") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" );
       break;
     }
   }
@@ -54,6 +55,54 @@ void IBVSRandomNode::writeLogData(){
 
 void IBVSRandomNode::resetSolver(){
   SHERPA_planner_.InitializeController();
+}
+
+void IBVSRandomNode::navigationObstaclesCallback(const pantheon_2d_slam::navigationObstaclesConstPtr& navobstsmsg){
+  
+  int num_static_obstacles = navobstsmsg->staticObstacles.size();
+  if( !num_static_obstacles )
+    return;
+
+  float c = cos(0.045);
+  float s = sin(0.045);
+
+  geometry_msgs::Point static_obst = navobstsmsg->staticObstacles[0];
+  float x = c * static_obst.x - s * static_obst.y;
+	float y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst1_ << x, y;
+  Obst1_ << x, y, 0.f;
+
+  static_obst = navobstsmsg->staticObstacles[1];
+  x = c * static_obst.x - s * static_obst.y;
+	y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst2_ << x, y;
+  Obst2_ << x, y, 0.f;
+  
+  static_obst = navobstsmsg->staticObstacles[2];
+  x = c * static_obst.x - s * static_obst.y;
+	y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst3_ << x, y;
+  Obst3_ << x, y, 0.f;
+
+  static_obst = navobstsmsg->staticObstacles[3];
+  x = c * static_obst.x - s * static_obst.y;
+	y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst4_ << x, y;
+  Obst4_ << x, y, 0.f;
+
+  static_obst = navobstsmsg->staticObstacles[4];
+  x = c * static_obst.x - s * static_obst.y;
+	y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst5_ << x, y;
+  Obst5_ << x, y, 0.f;
+
+  static_obst = navobstsmsg->staticObstacles[5];
+  x = c * static_obst.x - s * static_obst.y;
+	y = s * static_obst.x + c * static_obst.y;
+  SHERPA_planner_.obst6_ << x, y;
+  Obst6_ << x, y, 0.f;
+  SHERPA_planner_.InitializeController();
+
 }
 
 void IBVSRandomNode::LyapunovCallback(const std_msgs::Float32ConstPtr& lyapunov_msg){

@@ -6,6 +6,7 @@
 
 //ros STUFF
 #include <cv_bridge/cv_bridge.h>
+#include <pantheon_2d_slam/navigationObstacles.h>
 
 //opencv library
 #include <opencv2/opencv.hpp>
@@ -55,6 +56,7 @@ class IBVSRandomNode: public MavGUI
      ros::Subscriber cmd_pose_sub_;
      ros::Subscriber ackrmann_cmd_sub_;
      ros::Subscriber lyapunov_sub_;
+     ros::Subscriber nav_obsts_sub_;
       
      //Solver Functions
      void initializeAcadoSolver();
@@ -65,6 +67,7 @@ class IBVSRandomNode: public MavGUI
      void AkrmCommandsCallback(const geometry_msgs::TwistConstPtr&);
      void ImageCallback(const sensor_msgs::ImageConstPtr&);
      void LyapunovCallback(const std_msgs::Float32ConstPtr&);
+     void navigationObstaclesCallback(const pantheon_2d_slam::navigationObstaclesConstPtr&);
      void resetSolver();
      void setDynamicObstacle();
      void getStaticObstacle(); 

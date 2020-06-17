@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rvb_mpc)
+project(pantheon_planning_and_control)
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules" )
@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   rm3_ackermann_controller
   visualization_msgs
+  pantheon_2d_slam
 )
 
 find_package(yaml-cpp REQUIRED)
