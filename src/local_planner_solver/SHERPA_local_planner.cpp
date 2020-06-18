@@ -113,14 +113,14 @@ void SherpaAckermannPlanner::printControlVariables(){
 void SherpaAckermannPlanner::UpdateObstacles()
 {
   for (int i = 0; i < ACADO_N + 1; i++) {
-    acado_online_data_.block(i, 0, 1, ACADO_NOD) << obst1_(0), obst1_(1),     // 1st Obstacle x-y position
-                                                    obst2_(0), obst2_(1),     // 2st Obstacle x-y position
-                                                    obst3_(0), obst3_(1),     // 3st Obstacle x-y position
-                                                    obst4_(0), obst4_(1),     // 4st Obstacle x-y position
-                                                    obst5_(0), obst5_(1),     // 5st Obstacle x-y position
-                                                    obst6_(0), obst6_(1),     // 6st Obstacle x-y position
-                                                    obst7_(0), obst7_(1),     // tst Obstacle x-y position
-                                                    l_;                       // vehicle lenght
+    acado_online_data_.block(i, 0, 1, ACADO_NOD) << static_obstacles[0](0), static_obstacles[0](1),     // 1st Obstacle x-y position
+                                                    static_obstacles[1](0), static_obstacles[1](1),     // 2st Obstacle x-y position
+                                                    static_obstacles[2](0), static_obstacles[2](1),     // 3st Obstacle x-y position
+                                                    static_obstacles[3](0), static_obstacles[3](1),     // 4st Obstacle x-y position
+                                                    static_obstacles[4](0), static_obstacles[4](1),     // 5st Obstacle x-y position
+                                                    static_obstacles[5](0), static_obstacles[5](1),     // 6st Obstacle x-y position
+                                                    static_obstacles[6](0), static_obstacles[6](1),     // tst Obstacle x-y position
+                                                    l_;                                                 // vehicle lenght
   }
 
   Eigen::Map<Eigen::Matrix<double, ACADO_NOD, ACADO_N + 1>>(const_cast<double*>(acadoVariables.od)) = acado_online_data_.transpose();
@@ -175,14 +175,14 @@ bool SherpaAckermannPlanner::InitializeController()
   std::cout << acadoVariables.ubValues[0] << " " << acadoVariables.ubValues[1] << " " << "\n" << "\n";
 
   for (int i = 0; i < ACADO_N + 1; i++) {
-    acado_online_data_.block(i, 0, 1, ACADO_NOD) << obst1_(0), obst1_(1),     // 1st Obstacle x-y position
-                                                    obst2_(0), obst2_(1),     // 2st Obstacle x-y position
-                                                    obst3_(0), obst3_(1),     // 3st Obstacle x-y position
-                                                    obst4_(0), obst4_(1),     // 4st Obstacle x-y position
-                                                    obst5_(0), obst5_(1),     // 5st Obstacle x-y position
-                                                    obst6_(0), obst6_(1),     // 6st Obstacle x-y position
-                                                    obst7_(0), obst7_(1),     // tst Obstacle x-y position
-                                                    l_;                       // vehicle lenght
+    acado_online_data_.block(i, 0, 1, ACADO_NOD) << static_obstacles[0](0), static_obstacles[0](1),     // 1st Obstacle x-y position
+                                                    static_obstacles[1](0), static_obstacles[1](1),     // 2st Obstacle x-y position
+                                                    static_obstacles[2](0), static_obstacles[2](1),     // 3st Obstacle x-y position
+                                                    static_obstacles[3](0), static_obstacles[3](1),     // 4st Obstacle x-y position
+                                                    static_obstacles[4](0), static_obstacles[4](1),     // 5st Obstacle x-y position
+                                                    static_obstacles[5](0), static_obstacles[5](1),     // 6st Obstacle x-y position
+                                                    static_obstacles[6](0), static_obstacles[6](1),     // tst Obstacle x-y position
+                                                    l_;                                                 // vehicle lenght
   }
 
   std::cout << FBLU("Short Term controller Online Data matrix: ") << "\n"; 

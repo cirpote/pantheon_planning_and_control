@@ -67,7 +67,6 @@ class IBVSRandomNode: public MavGUI
      void LyapunovCallback(const std_msgs::Float32ConstPtr&);
      void navigationObstaclesCallback(const pantheon_2d_slam::navigationObstaclesConstPtr&);
      void resetSolver();
-     void setDynamicObstacle();
 
      //commands
      Eigen::Matrix<double,3,1>& ang_vel_ref;

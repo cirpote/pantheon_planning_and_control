@@ -103,6 +103,12 @@ void MavGUI::processAvatar(){
     shader->setMat4("model", currmodel7);
     sherpa_model->Draw(*shader);
 
+    glm::mat4 currmodel10 = glm::mat4(1.0f);
+    currmodel10 = glm::translate(currmodel10, glm::vec3(_des_pos_vec3f_t[0], _des_pos_vec3f_t[1], 0)); // translate it down so it's at the center of the scene
+    currmodel10 = glm::rotate(currmodel10, _des_orientationf_t, rot_axis);
+    shader->setMat4("model", currmodel10);
+    sherpa_model->Draw(*shader);
+
 
     glReadPixels ( 0, 0, 640, 640, GL_BGR,
                    GL_UNSIGNED_BYTE, ( GLubyte * ) avatarImg.data );

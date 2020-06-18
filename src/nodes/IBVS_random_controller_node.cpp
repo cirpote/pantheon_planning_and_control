@@ -43,37 +43,16 @@ void IBVSRandomNode::navigationObstaclesCallback(const pantheon_2d_slam::navigat
   int iter = 0;
   for( geometry_msgs::Point pt : navobstsmsg->staticObstacles ){
     static_obstacles[iter] << pt.x, pt.y;
-    //std::cout << static_obstacles[iter].transpose() << "\n";
+    SHERPA_planner_.static_obstacles[iter] << pt.x, pt.y;
     iter++;
   } 
-
-
-  geometry_msgs::Point static_obst = navobstsmsg->staticObstacles[0];
-  SHERPA_planner_.obst1_ << static_obst.x, static_obst.y;
-
-  static_obst = navobstsmsg->staticObstacles[1];
-  SHERPA_planner_.obst2_ << static_obst.x, static_obst.y;
-  
-  static_obst = navobstsmsg->staticObstacles[2];
-  SHERPA_planner_.obst3_ << static_obst.x, static_obst.y;
-
-  static_obst = navobstsmsg->staticObstacles[3];
-  SHERPA_planner_.obst4_ << static_obst.x, static_obst.y;
-
-  static_obst = navobstsmsg->staticObstacles[4];
-  SHERPA_planner_.obst5_ << static_obst.x, static_obst.y;
-
-  static_obst = navobstsmsg->staticObstacles[5];
-  SHERPA_planner_.obst6_ << static_obst.x, static_obst.y;
 
   if( navobstsmsg->dynamicObstacles.size() ){
     geometry_msgs::Point dynamic_obstacle = navobstsmsg->dynamicObstacles[0];
     _dyn_obst_vec2f[0] = dynamic_obstacle.x;
     _dyn_obst_vec2f[1] = dynamic_obstacle.y;
-    SHERPA_planner_.obst7_ << dynamic_obstacle.x, dynamic_obstacle.y;
+    SHERPA_planner_.static_obstacles[6] << dynamic_obstacle.x, dynamic_obstacle.y;
   }
-
-
 
   SHERPA_planner_.UpdateObstacles();
 }
@@ -119,13 +98,6 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
   trajectory_pts_pub_.publish(trajectory_pts_);
 
   return;
-}
-
-void IBVSRandomNode::setDynamicObstacle(){
-
-  SHERPA_planner_.obst7_ = Eigen::Vector2d(_dyn_obst_vec2f[0], _dyn_obst_vec2f[1]);
-  SHERPA_planner_.InitializeController();
-  std::cout << FGRN("vertical_obst_7 succesfully set to: ") << SHERPA_planner_.obst7_.transpose() << "\n";
 }
 
 static void error_callback(int error, const char* description) {
