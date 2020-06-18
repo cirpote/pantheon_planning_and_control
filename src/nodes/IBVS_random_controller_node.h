@@ -39,8 +39,6 @@ class IBVSRandomNode: public MavGUI
    
       // Boolean controls
       bool first_trajectory_cmd_;
-     //  randomSpawner dynObjSpawner;
-     ofstream logFileStream;
      char packagePath[200];
      std::string fileName;
 
@@ -70,13 +68,7 @@ class IBVSRandomNode: public MavGUI
      void navigationObstaclesCallback(const pantheon_2d_slam::navigationObstaclesConstPtr&);
      void resetSolver();
      void setDynamicObstacle();
-     void getStaticObstacle(); 
-     void writeLogData();
 
      //commands
      Eigen::Matrix<double,3,1>& ang_vel_ref;
-
-     std::vector<Eigen::Vector2d> trees_array;
-     bool trees_received = false;
-     void computeClosestTrees();
 };

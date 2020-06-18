@@ -16,6 +16,7 @@ public:
       SherpaAckermannPlanner(const std::string& yaml_file);
       ~SherpaAckermannPlanner();
 
+      void UpdateObstacles();
       bool InitializeController();
       void calculateRollPitchYawRateThrustCommands(trajectory_msgs::JointTrajectory&);
       bool setCommandPose(const nav_msgs::Odometry);

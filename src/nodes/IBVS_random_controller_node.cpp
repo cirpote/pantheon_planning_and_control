@@ -4,8 +4,7 @@ using namespace std;
 
 IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_short_file)
   : MavGUI(nh), nh_(nh), first_trajectory_cmd_(false), SHERPA_planner_(yaml_short_file), 
-    ang_vel_ref(SHERPA_planner_.odometry.angular_velocity_B), trees_array(21, Eigen::Vector2d(0,0))
-
+    ang_vel_ref(SHERPA_planner_.odometry.angular_velocity_B)
 {
 
   odom_sub_ = nh_.subscribe( SHERPA_planner_.odometry_topic, 1, &IBVSRandomNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay() );
@@ -25,33 +24,11 @@ IBVSRandomNode::IBVSRandomNode(ros::NodeHandle& nh, const std::string& yaml_shor
 
   this->init3DObjRendering( ros::package::getPath("pantheon_planning_and_control") );
 
-  int iter = 0;
-  while(true){
-    if (exists( ros::package::getPath("pantheon_planning_and_control") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" ) ){
-        iter++;
-    } else {
-      logFileStream.open( ros::package::getPath("pantheon_planning_and_control") + "/log_output_folder/" + "log_output_" + to_string(iter) + ".txt" );
-      break;
-    }
-  }
-
 }
 
-IBVSRandomNode::~IBVSRandomNode(){
-  logFileStream.close();
-}
+IBVSRandomNode::~IBVSRandomNode(){}
 
-void IBVSRandomNode::writeLogData(){
 
-  logFileStream << ros::Time::now().toSec() << " " << SHERPA_planner_.odometry.position_W.x() << " " << SHERPA_planner_.odometry.position_W.y() << " " << 
-                   SHERPA_planner_.odometry.getYaw() << " " << SHERPA_planner_.solve_time << "\n"; //  orientation_W_B.w() << " " << stnl_controller.odometry.orientation_W_B.x() << " " << stnl_controller.odometry.orientation_W_B.y() << " " << stnl_controller.odometry.orientation_W_B.z() << " " <<
-                   /*trajectory_point.position_W.x() << " " << trajectory_point.position_W.y() << " " << trajectory_point.position_W.z() << " " << trajectory_point.getYaw() << " " <<
-                   _target_pos3f[0] << " " << _target_pos3f[1] << " " << _target_pos3f[2] << " " << _target_vel3f[0] << " " << _target_vel3f[1] << " " << _target_vel3f[2] << " " << *_t_delay << " " <<
-                   _vert_obst1_[0] << " " << _vert_obst1_[1] << " " << _vert_obst2_[0] << " " << _vert_obst2_[1] << " " << _horiz_obst_[0] << " " << _horiz_obst_[1] << " " <<
-                   stnl_controller.pT_W_.x() << " " << stnl_controller.pT_W_.y() << " " << stnl_controller.pT_W_.z() << " " << stnl_controller.camera_instrinsics_.x() << " " << stnl_controller.camera_instrinsics_.y() <<  " " <<
-                   stnl_controller.iter << " " << stnl_controller.solve_time << "\n";*/
-
-} 
 
 void IBVSRandomNode::resetSolver(){
   SHERPA_planner_.InitializeController();
@@ -63,46 +40,42 @@ void IBVSRandomNode::navigationObstaclesCallback(const pantheon_2d_slam::navigat
   if( !num_static_obstacles )
     return;
 
-  float c = cos(0.045);
-  float s = sin(0.045);
+  int iter = 0;
+  for( geometry_msgs::Point pt : navobstsmsg->staticObstacles ){
+    static_obstacles[iter] << pt.x, pt.y;
+    //std::cout << static_obstacles[iter].transpose() << "\n";
+    iter++;
+  } 
+
 
   geometry_msgs::Point static_obst = navobstsmsg->staticObstacles[0];
-  float x = c * static_obst.x - s * static_obst.y;
-	float y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst1_ << x, y;
-  Obst1_ << x, y, 0.f;
+  SHERPA_planner_.obst1_ << static_obst.x, static_obst.y;
 
   static_obst = navobstsmsg->staticObstacles[1];
-  x = c * static_obst.x - s * static_obst.y;
-	y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst2_ << x, y;
-  Obst2_ << x, y, 0.f;
+  SHERPA_planner_.obst2_ << static_obst.x, static_obst.y;
   
   static_obst = navobstsmsg->staticObstacles[2];
-  x = c * static_obst.x - s * static_obst.y;
-	y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst3_ << x, y;
-  Obst3_ << x, y, 0.f;
+  SHERPA_planner_.obst3_ << static_obst.x, static_obst.y;
 
   static_obst = navobstsmsg->staticObstacles[3];
-  x = c * static_obst.x - s * static_obst.y;
-	y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst4_ << x, y;
-  Obst4_ << x, y, 0.f;
+  SHERPA_planner_.obst4_ << static_obst.x, static_obst.y;
 
   static_obst = navobstsmsg->staticObstacles[4];
-  x = c * static_obst.x - s * static_obst.y;
-	y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst5_ << x, y;
-  Obst5_ << x, y, 0.f;
+  SHERPA_planner_.obst5_ << static_obst.x, static_obst.y;
 
   static_obst = navobstsmsg->staticObstacles[5];
-  x = c * static_obst.x - s * static_obst.y;
-	y = s * static_obst.x + c * static_obst.y;
-  SHERPA_planner_.obst6_ << x, y;
-  Obst6_ << x, y, 0.f;
-  SHERPA_planner_.InitializeController();
+  SHERPA_planner_.obst6_ << static_obst.x, static_obst.y;
 
+  if( navobstsmsg->dynamicObstacles.size() ){
+    geometry_msgs::Point dynamic_obstacle = navobstsmsg->dynamicObstacles[0];
+    _dyn_obst_vec2f[0] = dynamic_obstacle.x;
+    _dyn_obst_vec2f[1] = dynamic_obstacle.y;
+    SHERPA_planner_.obst7_ << dynamic_obstacle.x, dynamic_obstacle.y;
+  }
+
+
+
+  SHERPA_planner_.UpdateObstacles();
 }
 
 void IBVSRandomNode::LyapunovCallback(const std_msgs::Float32ConstPtr& lyapunov_msg){
@@ -137,9 +110,6 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
   _current_yaw_orientation_deg = _current_yaw_orientation * 180.0 / M_PI;
   _current_odom_position = utils::vector3FromPointMsg(odom_msg->pose.pose.position);  
 
-  if( trees_received )
-    computeClosestTrees();
-
   // Check Is the first trajectory msg has been received
   if(!first_trajectory_cmd_)
     return;
@@ -148,18 +118,7 @@ void IBVSRandomNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odom_msg
   trajectory_pts_.header.stamp. ros::Time::now();
   trajectory_pts_pub_.publish(trajectory_pts_);
 
-  writeLogData();
   return;
-}
-
-void IBVSRandomNode::computeClosestTrees(){
-
-  // TO IMPLEMENT
-}
-
-void IBVSRandomNode::getStaticObstacle(){
-  
-  // TO IMPLEMENT
 }
 
 void IBVSRandomNode::setDynamicObstacle(){
@@ -220,7 +179,7 @@ int main(int argc, char** argv) {
   bool show_gnomic_GUI = true;
 
   // Main loop
-  while (!glfwWindowShouldClose(window)) {
+  while (ros::ok()) {
     glfwPollEvents();
     ImGui_ImplGlfwGL3_NewFrame();
 

@@ -1,8 +1,6 @@
 #include "mav_imgui.h"
 
-MavGUI::MavGUI(ros::NodeHandle nh) : BaseGUI(nh), Obst1_(4,-2,0) ,
-                                                                   Obst2_(7,-2,0), Obst3_(10,-2,0) ,
-                                                                   Obst4_(4,-6.5,0) , Obst5_(7,-6.5,0) , Obst6_(10,-6.5,0) {
+MavGUI::MavGUI(ros::NodeHandle nh) : BaseGUI(nh), static_obstacles(6, Eigen::Vector2f(0.f, 0.f)) {
 
   _des_pos_vec3f_t[0] = 0.f;
   _des_pos_vec3f_t[1] = 0.f;
@@ -79,35 +77,14 @@ void MavGUI::processAvatar(){
     shader->setMat4("view", view);
 
     // render the loaded model
-    glm::mat4 currmodel1 = glm::mat4(1.0f);
-    currmodel1 = glm::translate(currmodel1, glm::vec3(Obst1_.x(), Obst1_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel1);
-    tree_model->Draw(*shader);
-
-    glm::mat4 currmodel2 = glm::mat4(1.0f);
-    currmodel2 = glm::translate(currmodel2, glm::vec3(Obst2_.x(), Obst2_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel2);
-    tree_model->Draw(*shader);
-
-    glm::mat4 currmodel3 = glm::mat4(1.0f);
-    currmodel3 = glm::translate(currmodel3, glm::vec3(Obst3_.x(), Obst3_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel3);
-    tree_model->Draw(*shader);
-
-    glm::mat4 currmodel4 = glm::mat4(1.0f);
-    currmodel4 = glm::translate(currmodel4, glm::vec3(Obst4_.x(), Obst4_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel4);
-    tree_model->Draw(*shader);
-
-    glm::mat4 currmodel5 = glm::mat4(1.0f);
-    currmodel5 = glm::translate(currmodel5, glm::vec3(Obst5_.x(), Obst5_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel5);
-    tree_model->Draw(*shader);
-
-    glm::mat4 currmodel6 = glm::mat4(1.0f);
-    currmodel6 = glm::translate(currmodel6, glm::vec3(Obst6_.x(), Obst6_.y(), 0)); // translate it down so it's at the center of the scene
-    shader->setMat4("model", currmodel6);
-    tree_model->Draw(*shader);
+    int iter = 0;
+    std::vector<glm::mat4> model(6, glm::mat4(1.0f));
+    for( Eigen::Vector2f vec : static_obstacles ){
+      model[iter] = glm::translate(model[iter], glm::vec3(vec.x(), vec.y(), 0));
+      shader->setMat4("model", model[iter]);
+      tree_model->Draw(*shader);
+      iter++;
+    }
 
     glm::mat4 currmodel8 = glm::mat4(1.0f);
     currmodel8 = glm::translate(currmodel8, glm::vec3(_dyn_obst_vec2f[0], _dyn_obst_vec2f[1], 0)); // translate it down so it's at the center of the scene
@@ -368,19 +345,6 @@ void MavGUI::showGUI(bool *p_open) {
   ImGui::SameLine();
   if (ImGui::Button("Disactivate"))
     disactivateController();
-
-
-
-  ImGui::Spacing();
-  ImGui::Text("Dynamic Obstacle");
-  ImGui::DragFloat2(" x y ", _dyn_obst_vec2f, 0.01f, -20.0f, 20.0f);
-  if (ImGui::Button("set Dyn. Obstacle"))
-    setDynamicObstacle();  
-
-  ImGui::Spacing();
-  ImGui::Text("Read Static Obstacles");
-  if (ImGui::Button("get Static Obstacle"))
-    getStaticObstacle();  
 
 }
 
