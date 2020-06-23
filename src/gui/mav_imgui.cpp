@@ -105,7 +105,7 @@ void MavGUI::processAvatar(){
 
     glm::mat4 currmodel10 = glm::mat4(1.0f);
     currmodel10 = glm::translate(currmodel10, glm::vec3(_des_pos_vec3f_t[0], _des_pos_vec3f_t[1], 0)); // translate it down so it's at the center of the scene
-    currmodel10 = glm::rotate(currmodel10, _des_orientationf_t, rot_axis);
+    currmodel10 = glm::rotate(currmodel10, -_des_orientationf_t, rot_axis);
     shader->setMat4("model", currmodel10);
     sherpa_model->Draw(*shader);
 
@@ -244,7 +244,7 @@ void MavGUI::showGUI(bool *p_open) {
   addDataPlot(_x_values, _x_min, _x_max, _current_odom_position(0));
   addDataPlot(_y_values, _y_min, _y_max, _current_odom_position(1));
   addDataPlot(_z_values, _z_min, _z_max, _current_odom_position(2));
-  addDataPlot(_yaw_values, _yaw_min, _yaw_max, _current_yaw_orientation_deg);
+  addDataPlot(_yaw_values, _yaw_min, _yaw_max, _current_yaw_orientation);
   ImGui::Separator();
   ImGui::Text("x[m]"); ImGui::NextColumn();
   ImGui::Text("y[m]"); ImGui::NextColumn();
@@ -254,7 +254,7 @@ void MavGUI::showGUI(bool *p_open) {
   ImGui::Text("%f", _current_odom_position(0)); ImGui::NextColumn();
   ImGui::Text("%f", _current_odom_position(1)); ImGui::NextColumn();
   ImGui::Text("%f", _current_odom_position(2)); ImGui::NextColumn();
-  ImGui::Text("%f", _current_yaw_orientation_deg);  ImGui::NextColumn();
+  ImGui::Text("%f", _current_yaw_orientation);  ImGui::NextColumn();
 
   ImGui::PlotLinesWithTarget("",_x_values, IM_ARRAYSIZE(_x_values), _des_pos_vec3f_w[0],
                              0,"x", FLT_MAX, FLT_MAX, ImVec2(0,40)); ImGui::NextColumn();
