@@ -115,13 +115,13 @@ int main( )
       // System variables
       DifferentialState     p_x, p_y, theta, dump;
       Control               v, phi;
-      OnlineData xObst1, yObst1, xObst2, yObst2, xObst3, yObst3, xObst4, yObst4, xObst5, yObst5, xObst6, yObst6, xObst7, yObst7, l;
+      OnlineData xObst1, yObst1, xObst2, yObst2, xObst3, yObst3, xObst4, yObst4, xObst5, yObst5, xObst6, yObst6, xObst7, yObst7, l, alpha, beta, gamma;
       DifferentialEquation  f;
       Function              h, hN;
 
       // Parameters with exemplary values. These are set/overwritten at runtime.
       const double t_start = 0.0;     // Initial time [s]
-      const double t_end = 10.0;       // Time horizon [s]
+      const double t_end = 15.0;       // Time horizon [s]
       const double dt = 0.5;          // Discretization time [s]
       const int N = round(t_end/dt);  // Number of nodes
 
@@ -174,13 +174,13 @@ int main( )
       h << p_x 
         << p_y 
         << theta 
-        << 1 / obstDist1 
-        << 1 / obstDist2
-        << 1 / obstDist3 
-        << 1 / obstDist4 
-        << 1 / obstDist5
-        << 1 / obstDist6 
-        << 1 / obstDist7 
+        << exp( alpha - beta * obstDist1) 
+        << exp( alpha - beta * obstDist2)
+        << exp( alpha - beta * obstDist3) 
+        << exp( alpha - beta * obstDist4) 
+        << exp( alpha - beta * obstDist5)
+        << exp( alpha - beta * obstDist6) 
+        << exp( gamma - beta * obstDist7)
         << phi 
         << v;
 
@@ -216,9 +216,9 @@ int main( )
       // Add constraints
       ocp.subjectTo(-.6 <=    phi    <= .6);
       ocp.subjectTo(-0.5 <=     v     <= 0.5);
-      ocp.subjectTo(1 <= obstDist7 <= 10000);
+      //ocp.subjectTo(1 <= obstDist7 <= 10000);
 
-      ocp.setNOD(15);
+      ocp.setNOD(18);
       OCPexport mpc(ocp);
 
       mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON);

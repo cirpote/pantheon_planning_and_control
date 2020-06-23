@@ -141,8 +141,8 @@ bool SherpaAckermannPlanner::InitializeController()
   W_(7,7) = q_obst_;
   W_(8,8) = q_obst_;
   W_(9,9) = q_obst_;
-  W_(10,10) = 500;
-  W_(11,11) = 500;
+  W_(10,10) = q_control_(0);
+  W_(11,11) = q_control_(1);
 
   WN_(0,0) = qf_p_(0);
   WN_(1,1) = qf_p_(1);
@@ -158,8 +158,8 @@ bool SherpaAckermannPlanner::InitializeController()
     
   for (size_t i = 0; i < ACADO_N; ++i) {
 
-    acadoVariables.lbAValues[ACADO_NPAC * i] = 1;                   // min obst1 dist
-    acadoVariables.ubAValues[ACADO_NPAC * i] = 100000;
+    //acadoVariables.lbAValues[ACADO_NPAC * i] = 1;                   // min obst1 dist
+    //acadoVariables.ubAValues[ACADO_NPAC * i] = 100000;
 
     acadoVariables.lbValues[ACADO_NU * i] = vel_bnds_(0);        // min vel_x
     acadoVariables.lbValues[ACADO_NU * i + 1] = vel_bnds_(0);    // min vel_y
@@ -182,7 +182,7 @@ bool SherpaAckermannPlanner::InitializeController()
                                                     static_obstacles[4](0), static_obstacles[4](1),     // 5st Obstacle x-y position
                                                     static_obstacles[5](0), static_obstacles[5](1),     // 6st Obstacle x-y position
                                                     static_obstacles[6](0), static_obstacles[6](1),     // tst Obstacle x-y position
-                                                    l_;                                                 // vehicle lenght
+                                                    l_, alpha_, beta_, gamma_;                          // vehicle lenght, barrier parameters
   }
 
   std::cout << FBLU("Short Term controller Online Data matrix: ") << "\n"; 
